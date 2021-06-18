@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<form>
+
+    <label for="fileWithUsers">Choose a profile picture:</label>
+
+    <input type="file"
+           id="fileWithUsers" name="fileWithUsers"
+           accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+    <button type="button" onclick="getDiplomas()">Get diploma!</button>
+</form>
+
+
+<script type="application/javascript">
+
+
+    function getDiplomas() {
+        const formData = new FormData();
+        const fileWithUsers = document.querySelector('input[type="file"]');
+        formData.append('users', fileWithUsers.files[0]);
+
+        fetch('/diplomas/get', {
+            method: 'POST',
+            body: formData
+        })
+            .then(resp => resp.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                // the filename you want
+                a.download = 'todo-1.zip';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
+    }
+</script>
+</body>
+</html>
