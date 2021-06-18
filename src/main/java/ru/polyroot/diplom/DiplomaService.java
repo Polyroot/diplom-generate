@@ -17,6 +17,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -62,12 +63,14 @@ public class DiplomaService {
 
     private File getFileDiploma(String userName){
 
-        File fileDiploma = new File(String.format(DIPLOMA_DIR + "/%s.pdf", userName));
-        log.info("fileDiploma absolute path {}", fileDiploma.getAbsolutePath());
+        String filePath = Objects.requireNonNull(getClass().getClassLoader().getResource(String.format(DIPLOMA_DIR + "/%s.pdf", userName))).getPath();
+
+        File fileDiploma = new File(filePath);
+        log.info("fileDiploma absolute path {}", filePath);
 
         try {
             Document document = new Document(PageSize.A4);
-            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(fileDiploma.getAbsolutePath()));
+            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(fileDiploma));
             document.open();
 
             addBackground(writer);
@@ -105,9 +108,9 @@ public class DiplomaService {
 
     private void addBackground(PdfWriter writer) throws IOException, DocumentException {
         PdfContentByte canvas = writer.getDirectContentUnder();
-        String path = new File(IMAGE_DIPLOMA_PATTERN).getAbsolutePath();
-        log.info("IMAGE_DIPLOMA_PATTERN absolute path {}", path);
-        Image image = Image.getInstance(path);
+        String filePath = Objects.requireNonNull(getClass().getClassLoader().getResource(IMAGE_DIPLOMA_PATTERN)).getPath();
+        log.info("IMAGE_DIPLOMA_PATTERN absolute path {}", filePath);
+        Image image = Image.getInstance(filePath);
         image.scaleAbsolute(PageSize.A4);
         image.setAbsolutePosition(0, 0);
         canvas.saveState();
