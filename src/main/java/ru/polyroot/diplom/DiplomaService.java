@@ -63,9 +63,11 @@ public class DiplomaService {
 
     private File getFileDiploma(String userName){
 
+        InputStream ruleSet = ClassLoader.getSystemResourceAsStream("");
+
         String filePath = Objects.requireNonNull(getClass().getClassLoader().getResource("").getPath());
 
-        File fileDiploma = new File(filePath + String.format("/%s.pdf", userName));
+        File fileDiploma = new File(filePath + String.format(DIPLOMA_DIR + "/%s.pdf", userName));
         log.info("fileDiploma absolute path {}", filePath);
 
         try {
