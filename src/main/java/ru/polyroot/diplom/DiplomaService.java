@@ -56,7 +56,6 @@ public class DiplomaService {
                 }
                 zipOutputStream.closeEntry();
             }
-//            zipOutputStream.flush();
         }
     }
 
@@ -64,9 +63,11 @@ public class DiplomaService {
     private File getFileDiploma(String userName){
 
         File fileDiploma = new File(String.format(DIPLOMA_DIR + "/%s.pdf", userName));
+        log.info("fileDiploma absolute path {}", fileDiploma.getAbsolutePath());
+
         try {
             Document document = new Document(PageSize.A4);
-            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(fileDiploma));
+            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(fileDiploma.getAbsolutePath()));
             document.open();
 
             addBackground(writer);
@@ -104,7 +105,9 @@ public class DiplomaService {
 
     private void addBackground(PdfWriter writer) throws IOException, DocumentException {
         PdfContentByte canvas = writer.getDirectContentUnder();
-        Image image = Image.getInstance(IMAGE_DIPLOMA_PATTERN);
+        String path = new File(IMAGE_DIPLOMA_PATTERN).getAbsolutePath();
+        log.info("IMAGE_DIPLOMA_PATTERN absolute path {}", path);
+        Image image = Image.getInstance(path);
         image.scaleAbsolute(PageSize.A4);
         image.setAbsolutePosition(0, 0);
         canvas.saveState();
