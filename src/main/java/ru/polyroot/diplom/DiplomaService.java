@@ -70,6 +70,16 @@ public class DiplomaService {
         File fileDiploma = new File(filePath + String.format(DIPLOMA_DIR + "/%s.pdf", "userName"));
         log.info("fileDiploma absolute path {}", filePath);
 
+        if(!fileDiploma.exists()){
+            try {
+                fileDiploma.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }else{
+            System.out.println("File already exists");
+        }
+
         try {
             Document document = new Document(PageSize.A4);
             PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(fileDiploma));
