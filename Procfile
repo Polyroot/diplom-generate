@@ -1,0 +1,1 @@
+web: java -jar target/diplom-0.1.jar
