@@ -46,21 +46,18 @@ public class DiplomaService {
     }
 
     private void createZipWithDiplomas(List<File> files, OutputStream out) throws IOException {
-        ZipOutputStream zipOutputStream = new ZipOutputStream(out);
-
-        // package files
-        for (File file : files) {
-            //new zip entry and copying inputstream with file to zipOutputStream, after all closing streams
-            zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
-            FileInputStream fileInputStream = new FileInputStream(file);
-
-            IOUtils.copy(fileInputStream, zipOutputStream);
-
-            fileInputStream.close();
-            zipOutputStream.closeEntry();
+        try(ZipOutputStream zipOutputStream = new ZipOutputStream(out)) {
+            // package files
+            for (File file : files) {
+                //new zip entry and copying inputstream with file to zipOutputStream, after all closing streams
+                zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
+                try (FileInputStream fileInputStream = new FileInputStream(file)) {
+                    IOUtils.copy(fileInputStream, zipOutputStream);
+                }
+                zipOutputStream.closeEntry();
+            }
+//            zipOutputStream.flush();
         }
-
-        zipOutputStream.close();
     }
 
 
