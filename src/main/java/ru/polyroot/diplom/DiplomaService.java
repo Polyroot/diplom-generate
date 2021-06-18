@@ -63,9 +63,9 @@ public class DiplomaService {
 
     private File getFileDiploma(String userName){
 
-        String filePath = Objects.requireNonNull(getClass().getClassLoader().getResource(String.format(DIPLOMA_DIR + "/%s.pdf", userName))).getPath();
+        String filePath = Objects.requireNonNull(getClass().getClassLoader().getResource("").getPath());
 
-        File fileDiploma = new File(filePath);
+        File fileDiploma = new File(filePath + String.format("/%s.pdf", userName));
         log.info("fileDiploma absolute path {}", filePath);
 
         try {
