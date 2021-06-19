@@ -47,7 +47,7 @@ public class DiplomaService {
     }
 
     private void createZipWithDiplomas(List<File> files, OutputStream out) throws IOException {
-        try(ZipOutputStream zipOutputStream = new ZipOutputStream(out)) {
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(out)) {
             // package files
             for (File file : files) {
                 //new zip entry and copying inputstream with file to zipOutputStream, after all closing streams
@@ -61,7 +61,7 @@ public class DiplomaService {
     }
 
 
-    private File getFileDiploma(String userName){
+    private File getFileDiploma(String userName) {
 
         InputStream ruleSet = ClassLoader.getSystemResourceAsStream("");
 
@@ -69,16 +69,6 @@ public class DiplomaService {
 
         File fileDiploma = new File(filePath + String.format(DIPLOMA_DIR + "/%s.pdf", "userName"));
         log.info("fileDiploma absolute path {}", filePath);
-
-        if(!fileDiploma.exists()){
-            try {
-                fileDiploma.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }else{
-            System.out.println("File already exists");
-        }
 
         try {
             Document document = new Document(PageSize.A4);
@@ -137,7 +127,7 @@ public class DiplomaService {
         List<String> users = new ArrayList<>();
 
         log.info("file parsing to list:");
-        try (InputStream fileInputStream = inputFile.getInputStream()){
+        try (InputStream fileInputStream = inputFile.getInputStream()) {
             Workbook workbook = new XSSFWorkbook(fileInputStream);
             Sheet sheet = workbook.getSheetAt(0);
 
