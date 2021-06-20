@@ -85,7 +85,6 @@
                         <ul class="nav masthead-nav">
                             <li class="active"><a href="#">Генерация дипломов</a></li>
                             <li><a href="#">Создание карточек</a></li>
-                            <li><a href="#">Другое</a></li>
                         </ul>
                     </nav>
                 </div>
@@ -94,24 +93,24 @@
             <div class="inner cover">
                 <h1 class="cover-heading">Сформировать дипломы.</h1>
                 <p class="lead">Загрузите файл в формате excel c одним столбцом, заполненным именами чуваков.</p>
-            </div>
 
-            <div class="input-group">
-                <label class="input-group-btn">
-                <span class="btn btn-primary">
-                    Выберите файл <input type="file"
-                                         id="fileWithUsers" name="fileWithUsers"
-                                         accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                                         style="display: none;" multiple>
-                </span>
-                </label>
-                <input type="text" class="form-control" readonly>
+                <div class="input-group">
+                    <label class="input-group-btn">
+                    <span class="btn btn-outline-secondary">
+                        Выберите файл <input type="file"
+                                             id="fileWithUsers" name="fileWithUsers"
+                                             accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                                             style="display: none;" multiple>
+                    </span>
+                    </label>
+                    <input type="text" class="form-control" readonly>
+                </div>
+                <button type="submit" class="btn btn-outline-secondary btn-block" onclick="getDiplomas()">Загрузить файл</button>
             </div>
-            <button type="submit" class="btn btn-primary" onclick="getDiplomas()">Загрузить файл</button>
 
             <div class="mastfoot">
                 <div class="inner">
-                    <p>Cover template for <a href="https://getbootstrap.com/">Bootstrap</a>, by <a href="https://twitter.com/mdo">@mdo</a>.</p>
+                    <p>Сайт для работы с чуваками, которые хотят совершенствоваться, прокачиваться в спорте и беге</p>
                 </div>
             </div>
 
@@ -121,14 +120,5 @@
 
 </div>
 
-
-<!--<form>-->
-<!--    <label for="fileWithUsers">Choose a profile picture:</label>-->
-
-<!--    <input type="file"-->
-<!--           id="fileWithUsers" name="fileWithUsers"-->
-<!--           accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">-->
-<!--    <button type="button" onclick="getDiplomas()">Get diploma!</button>-->
-<!--</form>-->
 </body>
 </html>
