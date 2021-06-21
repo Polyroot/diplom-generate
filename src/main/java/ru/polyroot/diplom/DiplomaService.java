@@ -9,6 +9,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
@@ -17,7 +18,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -26,10 +26,12 @@ import java.util.zip.ZipOutputStream;
 @Slf4j
 public class DiplomaService {
 
-    public static final String IMAGE_DIPLOMA_PATTERN = "patternDiploma/diplomaPattern.jpg";
-    public static final String DIPLOMA_DIR = "diplomas";
-    public static final String FONT = "diplomaFonts/arial.ttf";
-
+    @Value("${files.pattern_diploma}")
+    private String imageDiplomaPattern;
+    @Value("${files.diploma_dir}")
+    private String diplomaDir;
+    @Value("${files.font}")
+    private String font;
 
     public StreamingResponseBody getDiplomas(MultipartFile inputFile) {
 
@@ -65,10 +67,7 @@ public class DiplomaService {
 
         InputStream ruleSet = ClassLoader.getSystemResourceAsStream("");
 
-        String filePath = Objects.requireNonNull(getClass().getClassLoader().getResource("").getPath());
-
-        File fileDiploma = new File(filePath + String.format(DIPLOMA_DIR + "/%s.pdf", userName));
-        log.info("fileDiploma absolute path {}", filePath);
+        File fileDiploma = new File(String.format(diplomaDir + "/%s.pdf", userName));
 
         try {
             Document document = new Document(PageSize.A4);
@@ -100,7 +99,7 @@ public class DiplomaService {
 
     private Font getFont() {
         try {
-            BaseFont bf = BaseFont.createFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            BaseFont bf = BaseFont.createFont(font, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
             return new Font(bf, 36, Font.ITALIC);
         } catch (IOException | DocumentException e) {
             log.error(e.getLocalizedMessage(), e);
@@ -110,9 +109,7 @@ public class DiplomaService {
 
     private void addBackground(PdfWriter writer) throws IOException, DocumentException {
         PdfContentByte canvas = writer.getDirectContentUnder();
-        String filePath = Objects.requireNonNull(getClass().getClassLoader().getResource(IMAGE_DIPLOMA_PATTERN)).getPath();
-        log.info("IMAGE_DIPLOMA_PATTERN absolute path {}", filePath);
-        Image image = Image.getInstance(filePath);
+        Image image = Image.getInstance(imageDiplomaPattern);
         image.scaleAbsolute(PageSize.A4);
         image.setAbsolutePosition(0, 0);
         canvas.saveState();
@@ -146,9 +143,9 @@ public class DiplomaService {
         return users;
     }
 
-    public static void cleanDiplomasDir() {
-        File diplomaDir = new File(DIPLOMA_DIR);
-        File[] files = diplomaDir.listFiles();
+    public void cleanDiplomasDir() {
+        File diplomaDirectory = new File(diplomaDir);
+        File[] files = diplomaDirectory.listFiles();
         if (files != null) {
             Arrays.stream(files).forEach(File::delete);
         }
