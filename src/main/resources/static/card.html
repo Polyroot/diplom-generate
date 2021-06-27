@@ -64,7 +64,7 @@
         }
 
         formData.append('users', fileWithUsers.files[0]);
-        fetch('/diplomas/get', {
+        fetch('/cards/get', {
             method: 'POST',
             body: formData
         })
@@ -75,7 +75,7 @@
                 a.style.display = 'none';
                 a.href = url;
                 // the filename you want
-                a.download = 'todo-1.zip';
+                a.download = 'cards.zip';
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
@@ -94,21 +94,22 @@
                     <h3 class="masthead-brand">Бег с удовольствием</h3>
                     <nav>
                         <ul class="nav masthead-nav">
-                            <li class="active"><a href="#">Генерация дипломов</a></li>
-                            <li><a href="#">Создание карточек</a></li>
+                            <li><a href="diplomaG.html">Дипломы Девушкам</a></li>
+                            <li><a href="diplomaB.html">Дипломы Парням</a></li>
+                            <li class="active"><a href="card.html">Карточки</a></li>
                         </ul>
                     </nav>
                 </div>
             </div>
 
             <div class="inner cover">
-                <h1 class="cover-heading">Сформировать дипломы.</h1>
-                <p class="lead">Загрузите файл в формате excel c одним столбцом, заполненным именами чуваков.</p>
+                <h1 class="cover-heading">Сформировать Карточки</h1>
+                <p class="lead">Загрузите файл в формате excel c двумя столбцами, заполненными именами и датами соответственно.</p>
 
                 <div class="input-group">
                     <label class="input-group-btn">
                     <span class="btn btn-outline-secondary">
-                        Выберите файл <input type="file"
+                        excel-файл<input type="file"
                                              id="fileWithUsers" name="fileWithUsers"
                                              accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                                              style="display: none;" multiple>
@@ -117,7 +118,7 @@
                     <input type="text" class="form-control" readonly>
                 </div>
                 <button type="submit" class="btn btn-outline-secondary btn-block" onclick="getDiplomas()">Загрузить
-                    файл
+                    карточки
                 </button>
             </div>
 

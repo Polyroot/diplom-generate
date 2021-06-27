@@ -10,6 +10,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
@@ -21,20 +22,21 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+@Service
 @Slf4j
-public abstract class DiplomaService {
+public class CardService {
 
-    @Value("${files.diploma_dir}")
-    private String diplomaDir;
-    @Value("${files.diploma_font}")
-    private String diplomaFont;
+    @Value("${files.card_dir}")
+    private String cardDir;
+    @Value("${files.card_font}")
+    private String cardFont;
+    @Value("${files.pattern_card}")
+    private String imageCardPattern;
 
-    public abstract String getImageDiplomaPattern();
-
-    public StreamingResponseBody getDiplomas(MultipartFile inputFile) {
+    public StreamingResponseBody getCards(MultipartFile inputFile) {
 
         log.info("input file with name {}", inputFile.getOriginalFilename());
-        List<String> users = parseFileToList(inputFile);
+        List<User> users = parseFileToList(inputFile);
 
         List<File> files = users.stream()
                 .map(this::getFileDiploma)
@@ -42,7 +44,7 @@ public abstract class DiplomaService {
 
         return out -> {
             createZipWithDiplomas(files, out);
-            cleanDiplomasDir();
+            cleanCardsDir();
         };
     }
 
@@ -61,17 +63,20 @@ public abstract class DiplomaService {
     }
 
 
-    private File getFileDiploma(String userName) {
+    private File getFileDiploma(User user) {
 
-        File fileDiploma = new File(String.format(diplomaDir + "/%s.pdf", userName));
+        File fileDiploma = new File(String.format(cardDir + "/%s.pdf", user.getName()));
 
         try {
-            Document document = new Document(PageSize.A4);
+            Rectangle one = new Rectangle(1052,674);
+
+            Document document = new Document(one);
             PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(fileDiploma));
             document.open();
 
             addBackground(writer);
-            addUserSignature(writer, userName);
+            addUserSignature(writer, user.getName());
+            addDate(writer, user.getDate());
 
             document.close();
         } catch (Exception e) {
@@ -80,11 +85,24 @@ public abstract class DiplomaService {
         return fileDiploma;
     }
 
+    private void addDate(PdfWriter writer, String date) throws DocumentException{
+        PdfContentByte canvas1 = writer.getDirectContent();
+        ColumnText ct = new ColumnText(canvas1);
+        ct.setSimpleColumn(570, 80, 952, 110);
+        ct.setAlignment(Element.ALIGN_CENTER);
+
+        Font font = getDiplomaFont();
+
+        Chunk chunk = new Chunk(date, font);
+        ct.addText(chunk);
+        ct.go();
+    }
+
     private void addUserSignature(PdfWriter writer, String userName) throws DocumentException {
         PdfContentByte canvas1 = writer.getDirectContent();
         ColumnText ct = new ColumnText(canvas1);
-        ct.setSimpleColumn(0, 430, 595, 485);
-        ct.setAlignment(Element.ALIGN_CENTER);
+        ct.setSimpleColumn(150, 220, 952, 255);
+        ct.setAlignment(Element.ALIGN_LEFT);
 
         Font font = getDiplomaFont();
 
@@ -95,7 +113,7 @@ public abstract class DiplomaService {
 
     private Font getDiplomaFont() {
         try {
-            BaseFont bf = BaseFont.createFont(diplomaFont, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            BaseFont bf = BaseFont.createFont(cardFont, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
             return new Font(bf, 36, Font.NORMAL);
         } catch (IOException | DocumentException e) {
             log.error(e.getLocalizedMessage(), e);
@@ -107,8 +125,7 @@ public abstract class DiplomaService {
 
     private void addBackground(PdfWriter writer) throws IOException, DocumentException {
         PdfContentByte canvas = writer.getDirectContentUnder();
-        Image image = Image.getInstance(getImageDiplomaPattern());
-        image.scaleAbsolute(PageSize.A4);
+        Image image = Image.getInstance(imageCardPattern);
         image.setAbsolutePosition(0, 0);
         canvas.saveState();
         PdfGState state = new PdfGState();
@@ -118,8 +135,8 @@ public abstract class DiplomaService {
     }
 
 
-    private List<String> parseFileToList(MultipartFile inputFile) {
-        List<String> users = new ArrayList<>();
+    private List<User> parseFileToList(MultipartFile inputFile) {
+        List<User> users = new ArrayList<>();
 
         log.info("file parsing to list:");
         try (InputStream fileInputStream = inputFile.getInputStream()) {
@@ -127,12 +144,20 @@ public abstract class DiplomaService {
             Sheet sheet = workbook.getSheetAt(0);
 
             for (Row row : sheet) {
+                User user = null;
+                int cellNumber = 0;
                 for (Cell cell : row) {
-                    if (cell.getRichStringCellValue().length() == 0) break;
-                    String username = cell.getRichStringCellValue().getString();
-                    log.info(username);
-                    users.add(username);
-                    break;
+                    cellNumber++;
+                    if (cell.getRichStringCellValue().length() == 0 || cellNumber == 3) break;
+                    String cellValue = cell.getRichStringCellValue().getString();
+                    log.info(cellValue);
+
+                    if (cellNumber == 1) {
+                        user = new User();
+                        user.setName(cellValue);
+                        users.add(user);
+                    }
+                    if (cellNumber == 2) user.setDate(cellValue);
                 }
             }
             log.info("file parsed successfully!");
@@ -142,8 +167,8 @@ public abstract class DiplomaService {
         return users;
     }
 
-    public void cleanDiplomasDir() {
-        File diplomaDirectory = new File(diplomaDir);
+    public void cleanCardsDir() {
+        File diplomaDirectory = new File(cardDir);
         File[] files = diplomaDirectory.listFiles();
         if (files != null) {
             Arrays.stream(files).forEach(File::delete);

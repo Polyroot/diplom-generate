@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>diplomas generator</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Custom styles for this template -->
+    <link href="cover.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+
+<script type="application/javascript">
+
+    $(function () {
+
+        // This code will attach `fileselect` event to all file inputs on the page
+        $(document).on('change', ':file', function () {
+            var input = $(this),
+                numFiles = input.get(0).files ? input.get(0).files.length : 1,
+                label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+            input.trigger('fileselect', [numFiles, label]);
+        });
+
+
+        $(document).ready(function () {
+//below code executes on file input change and append name in text control
+            $(':file').on('fileselect', function (event, numFiles, label) {
+
+                var input = $(this).parents('.input-group').find(':text'),
+                    log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+                if (input.length) {
+                    input.val(log);
+                } else {
+                    if (log) alert(log);
+                }
+
+            });
+        });
+
+    });
+
+
+    function getDiplomas() {
+        const formData = new FormData();
+        const fileWithUsers = document.querySelector('input[type="file"]');
+
+        if (fileWithUsers.files.length === 0) {
+            alert("Файл не выбран!");
+            return;
+        }
+
+        formData.append('users', fileWithUsers.files[0]);
+        fetch('/diplomas/get/g', {
+            method: 'POST',
+            body: formData
+        })
+            .then(resp => resp.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                // the filename you want
+                a.download = 'girl diplomas.zip';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
+    }
+</script>
+
+<div class="site-wrapper">
+
+    <div class="site-wrapper-inner">
+
+        <div class="cover-container">
+
+            <div class="masthead clearfix">
+                <div class="inner">
+                    <h3 class="masthead-brand">Бег с удовольствием</h3>
+                    <nav>
+                        <ul class="nav masthead-nav">
+                            <li class="active"><a href="diplomaG.html">Дипломы Девушкам</a></li>
+                            <li><a href="diplomaB.html">Дипломы Парням</a></li>
+                            <li><a href="card.html">Карточки</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+
+
+            <div class="inner cover">
+                <h1 class="cover-heading">Сформировать дипломы девушкам</h1>
+                <p class="lead">Загрузите файл в формате excel c одним столбцом, заполненным именами.</p>
+
+                <div class="input-group">
+                    <label class="input-group-btn">
+                    <span class="btn btn-outline-secondary">
+                        excel-файл<input type="file"
+                                             id="fileWithUsers" name="fileWithUsers"
+                                             accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                                             style="display: none;" multiple>
+                    </span>
+                    </label>
+                    <input type="text" class="form-control" readonly>
+                </div>
+                <button type="submit" class="btn btn-outline-secondary btn-block" onclick="getDiplomas()">Загрузить
+                    дипломы
+                </button>
+            </div>
+
+            <div class="mastfoot">
+                <div class="inner">
+                    <p>Сайт для работы с чуваками, которые хотят совершенствоваться, прокачиваться в спорте и беге</p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
