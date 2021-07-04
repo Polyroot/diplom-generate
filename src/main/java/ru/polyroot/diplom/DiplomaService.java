@@ -28,6 +28,8 @@ public abstract class DiplomaService {
     private String diplomaDir;
     @Value("${files.diploma_font}")
     private String diplomaFont;
+    @Value("${files.diploma_border}")
+    private String diplomaBorderSignature;
 
     public abstract String getImageDiplomaPattern();
 
@@ -71,6 +73,7 @@ public abstract class DiplomaService {
             document.open();
 
             addBackground(writer);
+            addBorderUserSignature(writer, userName);
             addUserSignature(writer, userName);
 
             document.close();
@@ -78,6 +81,25 @@ public abstract class DiplomaService {
             log.error(e.getLocalizedMessage(), e);
         }
         return fileDiploma;
+    }
+
+    private void addBorderUserSignature(PdfWriter writer, String userName) throws DocumentException, IOException {
+
+        PdfContentByte canvas = writer.getDirectContentUnder();
+        Image image = Image.getInstance(diplomaBorderSignature);
+
+        float widthBorderCalculated = 18.6F * userName.length();
+        float widthBorder = widthBorderCalculated > 300 ? widthBorderCalculated : 300;
+
+        Rectangle one = new Rectangle(widthBorder,71);
+        image.scaleAbsolute(one);
+        image.setAbsolutePosition((PageSize.A4.getWidth() - widthBorder)/2, 442);
+
+        canvas.saveState();
+        PdfGState state = new PdfGState();
+        canvas.setGState(state);
+        canvas.addImage(image);
+        canvas.restoreState();
     }
 
     private void addUserSignature(PdfWriter writer, String userName) throws DocumentException {
@@ -96,7 +118,7 @@ public abstract class DiplomaService {
     private Font getDiplomaFont() {
         try {
             BaseFont bf = BaseFont.createFont(diplomaFont, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-            return new Font(bf, 36, Font.NORMAL);
+            return new Font(bf, 31, Font.NORMAL);
         } catch (IOException | DocumentException e) {
             log.error(e.getLocalizedMessage(), e);
         }
