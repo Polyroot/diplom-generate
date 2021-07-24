@@ -14,9 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -36,11 +36,11 @@ public abstract class DiplomaService {
     public StreamingResponseBody getDiplomas(MultipartFile inputFile) {
 
         log.info("input file with name {}", inputFile.getOriginalFilename());
-        List<String> users = parseFileToList(inputFile);
+        Set<String> users = parseFileToList(inputFile);
 
-        List<File> files = users.stream()
+        Set<File> files = users.stream()
                 .map(this::getFileDiploma)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
 
         return out -> {
             createZipWithDiplomas(files, out);
@@ -48,7 +48,7 @@ public abstract class DiplomaService {
         };
     }
 
-    private void createZipWithDiplomas(List<File> files, OutputStream out) throws IOException {
+    private void createZipWithDiplomas(Set<File> files, OutputStream out) throws IOException {
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(out)) {
             // package files
             for (File file : files) {
@@ -140,8 +140,8 @@ public abstract class DiplomaService {
     }
 
 
-    private List<String> parseFileToList(MultipartFile inputFile) {
-        List<String> users = new ArrayList<>();
+    private Set<String> parseFileToList(MultipartFile inputFile) {
+        Set<String> users = new HashSet<>();
 
         log.info("file parsing to list:");
         try (InputStream fileInputStream = inputFile.getInputStream()) {
