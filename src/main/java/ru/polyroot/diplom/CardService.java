@@ -10,27 +10,28 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.*;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static ru.polyroot.diplom.Utils.cleanTempDir;
+import static ru.polyroot.diplom.Utils.createTempDir;
+
 @Service
 @Slf4j
 public class CardService {
 
-    @Value("${files.card_dir}")
-    private String cardDir;
-    @Value("${files.card_font}")
-    private String cardFont;
-    @Value("${files.pattern_card}")
+    @Value("${files.card.font}")
+    private Resource cardFont;
+    @Value("${files.card.pattern}")
     private String imageCardPattern;
 
     public StreamingResponseBody getCards(MultipartFile inputFile) {
@@ -44,7 +45,7 @@ public class CardService {
 
         return out -> {
             createZipWithDiplomas(files, out);
-            cleanCardsDir();
+            cleanTempDir();
         };
     }
 
@@ -62,16 +63,15 @@ public class CardService {
         }
     }
 
-
     private File getFileDiploma(User user) {
 
-        File fileDiploma = new File(String.format(cardDir + "/%s.pdf", user.getName()));
+        File fileDiploma = new File(createTempDir(), user.getName() + ".pdf");
 
-        try {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(fileDiploma)) {
             Rectangle one = new Rectangle(1052,674);
 
             Document document = new Document(one);
-            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(fileDiploma));
+            PdfWriter writer = PdfWriter.getInstance(document, fileOutputStream);
             document.open();
 
             addBackground(writer);
@@ -113,14 +113,14 @@ public class CardService {
 
     private Font getDiplomaFont() {
         try {
-            BaseFont bf = BaseFont.createFont(cardFont, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-            return new Font(bf, 36, Font.NORMAL);
+            String cardFontAbsolutePath = cardFont.getURI().getPath();
+            BaseFont baseFont = BaseFont.createFont(cardFontAbsolutePath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            return new Font(baseFont, 36, Font.NORMAL);
         } catch (IOException | DocumentException e) {
             log.error(e.getLocalizedMessage(), e);
         }
         return new Font(Font.FontFamily.TIMES_ROMAN, 36, Font.ITALIC);
     }
-
 
 
     private void addBackground(PdfWriter writer) throws IOException, DocumentException {
@@ -167,11 +167,4 @@ public class CardService {
         return users;
     }
 
-    public void cleanCardsDir() {
-        File diplomaDirectory = new File(cardDir);
-        File[] files = diplomaDirectory.listFiles();
-        if (files != null) {
-            Arrays.stream(files).forEach(File::delete);
-        }
-    }
 }

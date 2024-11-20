@@ -1,0 +1,10 @@
+files:
+  diploma:
+    pattern:
+      muzhskoy: classpath:patterns/Muzhskoy.png
+      zhenskiy: classpath:patterns/Zhenskiy.png
+    border: classpath:patterns/patternBorder.png
+    font: classpath:fonts/MinionPro-It.ttf
+  card:
+    pattern: classpath:patterns/cardPattern.jpg
+    font: classpath:fonts/MinionPro-Regular.ttf
