@@ -22,6 +22,10 @@ public class DiplomaController {
     @Autowired
     private DiplomaService diplomaServiceB;
 
+    @Qualifier("Eng")
+    @Autowired
+    private DiplomaService diplomaServiceEng;
+
     @Autowired
     private CardService cardService;
 
@@ -39,6 +43,14 @@ public class DiplomaController {
         return ResponseEntity
                 .ok()
                 .body(diplomaServiceB.getDiplomas(inputFile));
+    }
+
+    @PostMapping(value="/diplomas/get/eng", produces="application/zip")
+    public ResponseEntity<StreamingResponseBody> getDiplomasEng(@RequestParam("users") MultipartFile inputFile) {
+
+        return ResponseEntity
+                .ok()
+                .body(diplomaServiceEng.getDiplomas(inputFile));
     }
 
     @PostMapping(value="/cards/get", produces="application/zip")

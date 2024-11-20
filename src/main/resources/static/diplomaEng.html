@@ -64,7 +64,7 @@
         }
 
         formData.append('users', fileWithUsers.files[0]);
-        fetch('/cards/get', {
+        fetch('/diplomas/get/eng', {
             method: 'POST',
             body: formData
         })
@@ -75,7 +75,7 @@
                 a.style.display = 'none';
                 a.href = url;
                 // the filename you want
-                a.download = 'cards.zip';
+                a.download = 'foreigners diplomas.zip';
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
@@ -96,16 +96,18 @@
                         <ul class="nav masthead-nav">
                             <li><a href="diplomaG.html">Дипломы Девушкам</a></li>
                             <li><a href="diplomaB.html">Дипломы Парням</a></li>
-                            <li><a href="diplomaEng.html">Дипломы Иностранцам</a></li>
-                            <li class="active"><a href="index.html">Карточки</a></li>
+                            <li class="active"><a href="diplomaEng.html">Дипломы Иностранцам</a></li>
+                            <li><a href="index.html">Карточки</a></li>
                         </ul>
                     </nav>
                 </div>
             </div>
 
+
+
             <div class="inner cover">
-                <h1 class="cover-heading">Сформировать Карточки</h1>
-                <p class="lead">Загрузите файл в формате excel c двумя столбцами, заполненными именами и датами соответственно. Обе колонки обязательно должны быть текстового формата.</p>
+                <h1 class="cover-heading">Сформировать дипломы иностранцам</h1>
+                <p class="lead">Загрузите файл в формате excel c одним столбцом, заполненным именами.</p>
 
                 <div class="input-group">
                     <label class="input-group-btn">
@@ -119,7 +121,7 @@
                     <input type="text" class="form-control" readonly>
                 </div>
                 <button type="submit" class="btn btn-outline-secondary btn-block" onclick="getDiplomas()">Загрузить
-                    карточки
+                    дипломы
                 </button>
             </div>
 
