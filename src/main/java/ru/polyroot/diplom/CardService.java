@@ -22,8 +22,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static ru.polyroot.diplom.Utils.cleanTempDir;
-import static ru.polyroot.diplom.Utils.createTempDir;
+import static ru.polyroot.diplom.Utils.*;
 
 @Service
 @Slf4j
@@ -33,6 +32,8 @@ public class CardService {
     private Resource cardFont;
     @Value("${files.card.pattern}")
     private String imageCardPattern;
+
+    private final static String CARD_DIR = "filesDir";
 
     public StreamingResponseBody getCards(MultipartFile inputFile) {
 
@@ -45,7 +46,7 @@ public class CardService {
 
         return out -> {
             createZipWithDiplomas(files, out);
-            cleanTempDir();
+            cleanTempDir(CARD_DIR);
         };
     }
 
@@ -65,7 +66,7 @@ public class CardService {
 
     private File getFileDiploma(User user) {
 
-        File fileDiploma = new File(createTempDir(), user.getName() + ".pdf");
+        File fileDiploma = createTempFile(CARD_DIR, user.getName() + ".pdf");
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(fileDiploma)) {
             Rectangle one = new Rectangle(1052,674);

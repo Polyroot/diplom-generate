@@ -5,7 +5,7 @@ files:
       zhenskiy: classpath:patterns/Zhenskiy.png
       eng: classpath:patterns/Eng.png
     border: classpath:patterns/patternBorder.png
-    font: classpath:fonts/MinionPro-It.ttf
+    font: fonts/MinionPro-It.ttf
   card:
     pattern: classpath:patterns/cardPattern.jpg
     font: classpath:fonts/MinionPro-Regular.ttf

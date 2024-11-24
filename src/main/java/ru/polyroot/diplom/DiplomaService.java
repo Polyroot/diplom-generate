@@ -2,15 +2,12 @@ package ru.polyroot.diplom;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
@@ -22,18 +19,35 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static ru.polyroot.diplom.Utils.cleanTempDir;
-import static ru.polyroot.diplom.Utils.createTempDir;
+import static ru.polyroot.diplom.Utils.*;
 
 @Slf4j
-@RequiredArgsConstructor
 public class DiplomaService {
-    @Value("${files.diploma.font}")
-    private Resource diplomaFont;
-    @Value("${files.diploma.border}")
-    private String diplomaBorderSignature;
 
     protected final String imageDiplomaPattern;
+    private final String signatureBorderPath;
+    private final Font signatureFont;
+
+    private final static String DIPLOMA_DIR = "filesDir";
+
+    public DiplomaService(String signatureFontPath,
+                          String signatureBorderPath,
+                          String imageDiplomaPattern) {
+        this.signatureBorderPath = signatureBorderPath;
+        this.signatureFont = initializeFont(signatureFontPath);
+        this.imageDiplomaPattern = imageDiplomaPattern;
+    }
+
+    private Font initializeFont(String diplomaFontPath) {
+        try {
+            String absolutePath = getAbsolutePath(diplomaFontPath);
+            BaseFont baseFont = BaseFont.createFont(absolutePath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            return new Font(baseFont, 31, Font.NORMAL);
+        } catch (IOException | DocumentException e) {
+            log.error("Error getting diploma font", e);
+        }
+        return new Font(Font.FontFamily.TIMES_ROMAN, 36, Font.ITALIC);
+    }
 
     public StreamingResponseBody getDiplomas(MultipartFile inputFile) {
         log.info("Input file with name {}", inputFile.getOriginalFilename());
@@ -44,7 +58,7 @@ public class DiplomaService {
 
         return out -> {
             createZipWithDiplomas(files, out);
-            cleanTempDir();
+            cleanTempDir(DIPLOMA_DIR);
         };
     }
 
@@ -64,7 +78,7 @@ public class DiplomaService {
             throw new IllegalArgumentException("User name cannot be null or empty");
         }
 
-        File fileDiploma = new File(createTempDir(), userName + ".pdf");
+        File fileDiploma = createTempFile(DIPLOMA_DIR, userName + ".pdf");
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(fileDiploma)) {
             Document document = new Document(PageSize.A4);
@@ -85,7 +99,7 @@ public class DiplomaService {
 
     private void addBorderUserSignature(PdfWriter writer, String userName) throws DocumentException, IOException {
         PdfContentByte canvas = writer.getDirectContentUnder();
-        Image image = Image.getInstance(diplomaBorderSignature);
+        Image image = Image.getInstance(signatureBorderPath);
 
         float widthBorderCalculated = 18.6F * userName.length();
         float widthBorder = Math.max(widthBorderCalculated, 300);
@@ -107,22 +121,9 @@ public class DiplomaService {
         columnText.setSimpleColumn(0, 430, PageSize.A4.getWidth(), 485);
         columnText.setAlignment(Element.ALIGN_CENTER);
 
-        Font font = getDiplomaFont();
-
-        Chunk chunk = new Chunk(userName, font);
+        Chunk chunk = new Chunk(userName, signatureFont);
         columnText.addText(chunk);
         columnText.go();
-    }
-
-    private Font getDiplomaFont() {
-        try {
-            String diplomaFontAbsolutePath = diplomaFont.getURI().getPath();
-            BaseFont baseFont = BaseFont.createFont(diplomaFontAbsolutePath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-            return new Font(baseFont, 31, Font.NORMAL);
-        } catch (IOException | DocumentException e) {
-            log.error("Error getting diploma font", e);
-        }
-        return new Font(Font.FontFamily.TIMES_ROMAN, 36, Font.ITALIC);
     }
 
     private void addBackground(PdfWriter writer) throws IOException, DocumentException {
