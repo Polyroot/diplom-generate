@@ -8,8 +8,10 @@ import org.springframework.stereotype.Service;
 @Qualifier("G")
 public class DiplomaServiceG extends DiplomaService{
 
-    public DiplomaServiceG(@Value("${files.diploma.pattern.zhenskiy}") String imageDiplomaPattern) {
-        super(imageDiplomaPattern);
+    public DiplomaServiceG(@Value("${files.diploma.font}") String signatureFontPath,
+                           @Value("${files.diploma.border}") String signatureBorderPath,
+                           @Value("${files.diploma.pattern.zhenskiy}") String imageDiplomaPattern) {
+        super(signatureFontPath, signatureBorderPath, imageDiplomaPattern);
     }
 
 }
